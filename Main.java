@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class main {
+public class Main {
     public static void main(String[] args) {
         ArrayList<Position> list = addPositions();
         for (Position p : list) {
@@ -20,10 +20,10 @@ public class main {
 
         ArrayList<Position> list = new ArrayList<Position>();
         for (Character c : listDoors) {
-            list.add(new Position(true, isAcessible(c, listKeys), c));
+            list.add(new Position("Door", isAcessible(c, listKeys), c));
         }
         for (Character c : listKeys) {
-            list.add(new Position(false, true, c));
+            list.add(new Position("Key", true, c));
         }
         return list;
     }
