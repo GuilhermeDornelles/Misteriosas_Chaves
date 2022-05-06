@@ -1,16 +1,16 @@
 public class Position {
-    private boolean door;
+    private String type;
     private boolean accessible;
     private char label;
 
-    public Position(boolean door, boolean accesible, char label) {
-        this.door = door;
+    public Position(String type, boolean accesible, char label) {
+        this.type = type;
         this.accessible = accesible;
         this.label = label;
     }
 
-    public boolean isDoor() {
-        return door;
+    public String type() {
+        return type;
     }
 
     public boolean isAccessible() {
@@ -22,6 +22,6 @@ public class Position {
     }
 
     public String toString() {
-        return "Posição: Label: " + label + " | Porta: " + door + " | Acessível: " + accessible;
+        return "Posição: Label: " + label + " | Tipo: " + type + " | Acessível: " + accessible;
     }
 }
