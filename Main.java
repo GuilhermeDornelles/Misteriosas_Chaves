@@ -20,10 +20,13 @@ public class Main {
 
         ArrayList<Position> list = new ArrayList<Position>();
         for (Character c : listDoors) {
-            list.add(new Position("Door", isAcessible(c, listKeys), c));
+            list.add(new Position(c));
         }
         for (Character c : listKeys) {
-            list.add(new Position("Key", true, c));
+            list.add(new Position(c));
+        }
+        for (int i = 0; i < 6; i++) {
+            list.add(new Position('.'));
         }
         return list;
     }
