@@ -1,3 +1,3 @@
 public enum Type {
-    DOOR, COMMON, KEY;
+    DOOR, COMMON, KEY, WALL, PLAYER;
 }
