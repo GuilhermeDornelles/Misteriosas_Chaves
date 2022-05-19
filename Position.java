@@ -4,29 +4,35 @@ public class Position {
     private Type type;
     private boolean accessible, marked;
     private char label;
-    private int id;
-    private static int countId = 1;
-    ArrayList<Integer> neighbors;
+    private ArrayList<Position> neighbors;
 
     public Position(char label) {
-        this.accessible = true;
         this.label = label;
         this.type = type();
         this.marked = false;
-        this.neighbors = new ArrayList<Integer>();
-        this.id = countId;
-        countId++;
+        this.neighbors = new ArrayList<Position>();
     }
 
     private Type type() {
         switch (label) {
             case '.':
+                this.accessible = true;
                 return Type.COMMON;
+            case '#':
+                this.accessible = false;
+                return Type.WALL;
             default: {
+                // The label is a digit, what means that it's a player
+                if (Character.isDigit(label)) {
+                    this.accessible = true;
+                    return Type.PLAYER;
+                }
                 // The label is in lowerCase, what means that it's a key
-                if (Character.toLowerCase(label) == label) {
+                else if (Character.toLowerCase(label) == label) {
+                    this.accessible = true;
                     return Type.KEY;
                 } else {
+                    this.accessible = false;
                     return Type.DOOR;
                 }
             }
@@ -41,20 +47,16 @@ public class Position {
         return accessible;
     }
 
-    public int getId() {
-        return this.id;
-    }
-
     public char getLabel() {
         return label;
     }
 
-    public ArrayList<Integer> getNeighbors() {
+    public ArrayList<Position> getNeighbors() {
         return neighbors;
     }
 
-    public void addNeighbor(int neighborId) {
-        this.neighbors.add(neighborId);
+    public void addNeighbor(Position position) {
+        this.neighbors.add(position);
     }
 
     public void markPosition(boolean bool) {
@@ -70,6 +72,33 @@ public class Position {
     }
 
     public String toString() {
-        return "Posição: Id:" + id + " | Label: '" + label + "' | Tipo: " + type + " | Acessível: " + accessible;
+        String toString = "";
+        switch (getType()) {
+            case DOOR:
+                toString = "Porta :";
+                break;
+            case WALL:
+                toString = "Parede :";
+                break;
+            case PLAYER:
+                toString = "Jogador :";
+                break;
+            case KEY:
+                toString = "Chave :";
+                break;
+            case COMMON:
+                toString = "Posição :";
+                break;
+        }
+        toString += " | Símbolo: '" + label + (accessible ? "' | Acessível " : "' | Não acessível") + "| Possui: "
+                + getNeighbors().size() + " vizinho(s) -> {";
+        for (int i = 0; i < getNeighbors().size(); i++) {
+            toString += getNeighbors().get(i).getLabel();
+            if (i < getNeighbors().size() - 1) {
+                toString += ", ";
+            }
+        }
+        toString += "}";
+        return toString;
     }
 }
