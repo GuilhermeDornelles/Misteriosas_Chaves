@@ -3,21 +3,23 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 //The class Map works like a Graph but with some changes
 public class Map {
     private ArrayList<Position> players;
     private ArrayList<Position> markedPositions;
     // After the running, pass through this list to see if exists doors to unlock
-    private ArrayList<Position> listOfDoors;
+    private ArrayList<Position> listOfLockedDoors;
     private ArrayList<Position> listOfKeys;
+
+    ArrayList<Position> visited;
 
     public Map(File file) {
         this.players = new ArrayList<>();
         this.markedPositions = new ArrayList<>();
-        this.listOfDoors = new ArrayList<>();
+        this.listOfLockedDoors = new ArrayList<>();
         this.listOfKeys = new ArrayList<>();
+        this.visited = new ArrayList<>();
         ArrayList<String> lines = new ArrayList<>();
         try {
             FileReader arq = new FileReader(file);
@@ -104,77 +106,117 @@ public class Map {
     }
 
     private int walk(Position position) {
+        if (!position.isAccessible() || position.IsMarked()) {
+            return 0;
+        }
         // It means that the method is called by a player and it's needed to markOff all
         // the nodes
         if (position.getType() == Type.PLAYER) {
             beginWalk();
-            System.out.println("Jogando com o player: " + position.getLabel());
+            // System.out.println("Jogando com o player: " + position.getLabel());
         }
 
         ArrayList<Position> list = new ArrayList<Position>();
 
         // This number will be returned meaning the number of positions
-        // that the node can "walk"
+        // the node can "walk"
         int count = 0;
         position.markPosition(true);
         markedPositions.add(position);
         list.add(position);
         while (!list.isEmpty()) {
             Position v = list.get(0);
+            if (visited.contains(v)) {
+                System.out.println("Repetido: " + v);
+            } else {
+                visited.add(v);
+            }
+            ;
             // Counts the position
             count++;
             for (Position neighbor : v.getNeighbors()) {
                 if (!neighbor.IsMarked()) {
                     if (neighbor.getType() == Type.KEY) {
-                        System.out.println("Chave encontrada: " + neighbor.getLabel());
+                        System.out
+                                .println("Nodo " + position.getLabel() + " encontrou a chave: " + neighbor.getLabel());
                         listOfKeys.add(neighbor);
                         neighbor.markPosition(true);
                         markedPositions.add(neighbor);
                         list.add(neighbor);
                     } else if (neighbor.getType() == Type.DOOR) {
-                        System.out.println("Porta encontrada: " + neighbor.getLabel());
-                        listOfDoors.add(neighbor);
+                        // If has the key, unlock the door and visit it
+                        if (unlockDoor(neighbor)) {
+                            neighbor.markPosition(true);
+                            markedPositions.add(neighbor);
+                            list.add(neighbor);
+                        } else {
+                            listOfLockedDoors.add(neighbor);
+                        }
+                        System.out
+                                .println("Nodo " + position.getLabel() + " encontrou a porta: " + neighbor.getLabel());
+
                     } else {
                         neighbor.markPosition(true);
                         markedPositions.add(neighbor);
                         list.add(neighbor);
                     }
                 }
-
             }
             list.remove(0);
         }
 
-        if (!listOfDoors.isEmpty()) {
-            for (Position door : listOfDoors) {
-                // Verify if there is a key for each door
-                if (!door.isAccessible()) {
-                    for (Position key : listOfKeys) {
-                        // The actual key is for the actual door
-                        if (Character.toLowerCase(door.getLabel()) == key.getLabel()) {
-                            door.markPosition(true);
-                            markedPositions.add(door);
-                            door.setAcessible(true);
-                            listOfDoors.remove(door);
-                            count += walk(door);
-                            break;
-                        }
-                    }
+        // Keeps a list of doors to walk from the locked doors
+
+        ArrayList<Position> doorsToWalk = new ArrayList<>();
+
+        if (!listOfLockedDoors.isEmpty()) {
+            for (Position door : listOfLockedDoors) {
+                if (unlockDoor(door) && !door.IsMarked()) {
+                    // count += walk(door);
+                    doorsToWalk.add(door);
                 }
             }
         }
+
+        while (!doorsToWalk.isEmpty()) {
+            Position door = doorsToWalk.get(0);
+            doorsToWalk.remove(0);
+            count += walk(door);
+        }
+
         return count;
+    }
+
+    // If finds the key, unlock the door. Else, add to the list of Locked doors
+    private boolean unlockDoor(Position door) {
+        if (!listOfKeys.isEmpty()) {
+            for (Position key : listOfKeys) {
+                if (Character.toUpperCase(key.getLabel()) == door.getLabel()) {
+                    door.setAcessible(true);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // beginWalk will prepare the lists to start a new walk in the map
     private void beginWalk() {
         clearMarkedPositions();
-        clearListOfDoors();
+        clearListOfLockedDoors();
         clearListOfKeys();
+        clearVisited();
+    }
+
+    private void clearVisited() {
+        visited.clear();
     }
 
     private void clearMarkedPositions() {
         for (Position p : markedPositions) {
+            if (p.getType() == Type.DOOR) {
+                p.setAcessible(false);
+            }
             p.markPosition(false);
         }
         markedPositions.clear();
@@ -184,12 +226,14 @@ public class Map {
         listOfKeys.clear();
     }
 
-    private void clearListOfDoors() {
-        listOfDoors.clear();
-    }
-
-    private void sortPLayers() {
-        players.sort((x, y) -> x.getLabel());
+    private void clearListOfLockedDoors() {
+        // First set the accessibility to the default value
+        for (Position door : listOfLockedDoors) {
+            if (door.isAccessible()) {
+                door.setAcessible(false);
+            }
+        }
+        listOfLockedDoors.clear();
     }
 
     public String results() {
