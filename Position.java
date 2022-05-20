@@ -90,7 +90,8 @@ public class Position {
                 toString = "Posição :";
                 break;
         }
-        toString += " | Símbolo: '" + label + (accessible ? "' | Acessível " : "' | Não acessível") + "| Possui: "
+        toString += " | Símbolo: '" + label + (accessible ? "' | Acessível " : "' | Não acessível ")
+                + (marked ? "' | Marcado " : "' | Não Marcado") + "| Possui: "
                 + getNeighbors().size() + " vizinho(s) -> {";
         for (int i = 0; i < getNeighbors().size(); i++) {
             toString += getNeighbors().get(i).getLabel();
