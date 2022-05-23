@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 //The class Map works like a Graph but with some changes
 public class Map {
+    private String path;
     private ArrayList<Position> players;
     private ArrayList<Position> markedPositions;
     // After the running, pass through this list to see if exists doors to unlock
@@ -20,6 +21,7 @@ public class Map {
         this.listOfLockedDoors = new ArrayList<>();
         this.listOfKeys = new ArrayList<>();
         this.visited = new ArrayList<>();
+        this.path = file.toPath().toString();
         ArrayList<String> lines = new ArrayList<>();
         try {
             FileReader arq = new FileReader(file);
@@ -106,7 +108,7 @@ public class Map {
     }
 
     private int walk(Position position) {
-        if (!position.isAccessible() || position.IsMarked()) {
+        if (!position.isAccessible()) {
             return 0;
         }
         // It means that the method is called by a player and it's needed to markOff all
@@ -114,6 +116,10 @@ public class Map {
         if (position.getType() == Type.PLAYER) {
             beginWalk();
             // System.out.println("Jogando com o player: " + position.getLabel());
+        }
+
+        if (position.IsMarked()) {
+            return 0;
         }
 
         ArrayList<Position> list = new ArrayList<Position>();
@@ -137,8 +143,9 @@ public class Map {
             for (Position neighbor : v.getNeighbors()) {
                 if (!neighbor.IsMarked()) {
                     if (neighbor.getType() == Type.KEY) {
-                        System.out
-                                .println("Nodo " + position.getLabel() + " encontrou a chave: " + neighbor.getLabel());
+                        // System.out
+                        // .println("Nodo " + position.getLabel() + " encontrou a chave: " +
+                        // neighbor.getLabel());
                         listOfKeys.add(neighbor);
                         neighbor.markPosition(true);
                         markedPositions.add(neighbor);
@@ -152,8 +159,9 @@ public class Map {
                         } else {
                             listOfLockedDoors.add(neighbor);
                         }
-                        System.out
-                                .println("Nodo " + position.getLabel() + " encontrou a porta: " + neighbor.getLabel());
+                        // System.out
+                        // .println("Nodo " + position.getLabel() + " encontrou a porta: " +
+                        // neighbor.getLabel());
 
                     } else {
                         neighbor.markPosition(true);
@@ -238,8 +246,9 @@ public class Map {
 
     public String results() {
         String results = "Results\n";
+        results += path + "\n";
         for (Position player : players) {
-            results += "Players " + player.getLabel() + " pode percorrer por " + walk(player) + " posições!\n";
+            results += "Player " + player.getLabel() + " pode percorrer por " + walk(player) + " posições!\n";
         }
         return results;
     }
